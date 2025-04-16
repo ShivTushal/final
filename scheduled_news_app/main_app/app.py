@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request
 import requests
 
@@ -6,7 +5,7 @@ app = Flask(__name__)
 
 NEWS_API_KEY = "2df0522c46654a7a81047c9ce38744cd"
 
-@app.route('/')
+@app.route('/news')
 def home():
     query = request.args.get('query') or 'technology'
     url = f'https://newsapi.org/v2/everything?q={query}&apiKey={NEWS_API_KEY}'
