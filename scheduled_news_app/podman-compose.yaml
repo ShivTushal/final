@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  schedule:
+    build:
+      context: ./schedule_app
+      dockerfile: Dockerfile
+    container_name: git_schedule_1
+    networks:
+      - git_default
+
+  main:
+    build:
+      context: ./main_app
+      dockerfile: Dockerfile
+    container_name: git_main_1
+    networks:
+      - git_default
+    # Don’t start this container until it is scheduled
+    restart: "no"
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: git_nginx_1
+    ports:
+      - "8080:80"
+    networks:
+      - git_default
+    depends_on:
+      - schedule
+
+networks:
+  git_default:
+    driver: bridge
