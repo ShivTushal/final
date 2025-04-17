@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: git_schedule_1
     volumes:
-      - ./schedule_app/start-container.sh:/host_scripts/start-container.sh  # ✅ Mount script
+      - /home/ubuntu/start-container.sh:/host_scripts/start-container.sh:ro  # ✅ Mount from host with read-only
     networks:
       git_default:
         ipv4_address: 10.89.0.2
