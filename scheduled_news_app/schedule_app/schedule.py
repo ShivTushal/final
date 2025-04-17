@@ -259,11 +259,11 @@ confirmation_html = '''
 <body>
     <div class="container">
         <div class="success-header">
-            <h2>✅ Your News Website Has Been Scheduled!</h2>
+            <h2>✅Your News Website HasBeen Scheduled!</h2>
         </div>
         <div class="content">
             <div class="message">
-                Your news application will launch at:
+                Your News Application will launch at:
             </div>
             <div class="time-display">
                 {{ time }}
@@ -353,8 +353,8 @@ def schedule():
     time = request.form['time']  # Expected format: HH:MM
 
     # 🕒 Schedule the 'start-container.sh' to run at the given time using `at`
-    schedule_command = f'echo "/app/start-container.sh" | at {time}'
-    os.system(schedule_command)
+    
+    os.system(f'echo "/home/ubuntu/start-container.sh >> /tmp/debug.log 2>&1" | at {time}')
 
     # ✅ Confirmation screen with countdown
     return render_template(confirmation_html, time=time)
