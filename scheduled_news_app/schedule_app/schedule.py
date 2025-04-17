@@ -358,7 +358,7 @@ def schedule():
 
     # 🕒 Schedule the 'start-container.sh' to run at the given time using `at`
     
-    os.system(f'echo "/home/ubuntu/start-container.sh >> /tmp/debug.log 2>&1" | at {time}')
+    os.system(f'echo "/host_scripts/start-container.sh >> /tmp/debug.log 2>&1" | at {time}')
 
     # ✅ Confirmation screen with countdown
     
