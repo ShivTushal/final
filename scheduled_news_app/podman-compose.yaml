@@ -6,8 +6,11 @@ services:
       context: ./schedule_app
       dockerfile: Dockerfile
     container_name: git_schedule_1
+    volumes:
+      - ./schedule_app/start-container.sh:/host_scripts/start-container.sh  # ✅ Mount script
     networks:
-      - git_default
+      git_default:
+        ipv4_address: 10.89.0.2
 
   main:
     build:
@@ -15,8 +18,8 @@ services:
       dockerfile: Dockerfile
     container_name: git_main_1
     networks:
-      - git_default
-    # Don’t start this container until it is scheduled
+      git_default:
+        ipv4_address: 10.89.0.3
     restart: "no"
 
   nginx:
@@ -27,10 +30,14 @@ services:
     ports:
       - "8080:80"
     networks:
-      - git_default
+      git_default:
+        ipv4_address: 10.89.0.4
     depends_on:
       - schedule
 
 networks:
   git_default:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 10.89.0.0/24
