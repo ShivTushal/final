@@ -354,7 +354,15 @@ def schedule():
 
     # 🕒 Schedule the 'start-container.sh' to run at the given time using `at`
     
+    def schedule():
+    time = request.form['time']  # Expected format: HH:MM
+
+    # 🕒 Schedule the 'start-container.sh' to run at the given time using `at`
+    
     os.system(f'echo "/home/ubuntu/start-container.sh >> /tmp/debug.log 2>&1" | at {time}')
+
+    # ✅ Confirmation screen with countdown
+    return render_template(confirmation_html, time=time)
 
     # ✅ Confirmation screen with countdown
     return render_template(confirmation_html, time=time)
