@@ -350,14 +350,34 @@ def index():
 
 @app.route('/schedule', methods=['POST'])
 def schedule():
-    time = request.form['time']  # Expected format: HH:MM
+    """Handle form submission and schedule container start"""
+    try:
+        time_str = request.form['time']  # Expected format: HH:MM
+        hour, minute = map(int, time_str.split(':'))
+        target_time = datetime.strptime(time_str, "%H:%M").time()
+        
+        # Start the scheduler in a background thread
+        thread = threading.Thread(
+            target=schedule_container_start,
+            args=(target_time,),
+            daemon=True
+        )
+        thread.start()
+        
+        # Log the scheduling
+        with open("/tmp/container_scheduler.log", "a") as log_file:
+            log_file.write(f"[{datetime.now()}] Scheduled container start for {time_str}\n")
+        
+        return render_template(confirmation_html, time=time_str)
+    
+    except ValueError as e:
+        return "Invalid time format. Please use HH:MM format.", 400
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
 
-    # 🕒 Schedule the 'start-container.sh' to run at the given time using at
-    cmd = f'echo "/host_scripts/start-container.sh >> /tmp/debug.log 2>&1" | at {time}'
-    subprocess.run(cmd, shell=True)
-
-    # ✅ Confirmation screen with countdown
-    return render_template(confirmation_html, time=time)
-
-if _name_ == '_main_':
-    app.run(host='0.0.0.0', port=8000)
+if __name__ == '__main__':
+    # Ensure log directory exists
+    os.makedirs("/tmp", exist_ok=True)
+    
+    # Start Flask app
+    app.run(host='0.0.0.0', port=8000, debug=True)
