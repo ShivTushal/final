@@ -272,7 +272,7 @@ confirmation_html = '''
                 ⏳ Redirecting in <span id="timer">calculating...</span>
             </div>
             <div class="note">
-                If not redirected automatically, <a href="http://13.126.87.128:8080/news">click here</a>.
+                If not redirected automatically, <a href="http://65.2.73.98:8080/news">click here</a>.
             </div>
             <a href="/" class="home-button">Schedule Again</a>
         </div>
@@ -308,7 +308,7 @@ confirmation_html = '''
                 
                 if (remaining <= 0) {
                     // Time's up! Redirect to the news app
-                    window.location.href = "http://13.126.87.128:8080/news";
+                    window.location.href = "http://65.2.73.98:8080/news";
                 } else {
                     // Calculate remaining time
                     let seconds = Math.floor((remaining / 1000) % 60);
