@@ -1,6 +1,6 @@
 from flask import Flask, request
 import os
-
+import subprocess
 app = Flask(__name__)
 
 # HTML templates as Python strings
@@ -352,18 +352,12 @@ def index():
 def schedule():
     time = request.form['time']  # Expected format: HH:MM
 
-    # 🕒 Schedule the 'start-container.sh' to run at the given time using `at`
-    
-     # Expected format: HH:MM
+    # 🕒 Schedule the 'start-container.sh' to run at the given time using at
+    cmd = f'echo "/host_scripts/start-container.sh >> /tmp/debug.log 2>&1" | at {time}'
+    subprocess.run(cmd, shell=True)
 
-    # 🕒 Schedule the 'start-container.sh' to run at the given time using `at`
-    
-    os.system(f'echo "/host_scripts/start-container.sh >> /tmp/debug.log 2>&1" | at {time}')
-
-    # ✅ Confirmation screen with countdown
-    
     # ✅ Confirmation screen with countdown
     return render_template(confirmation_html, time=time)
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     app.run(host='0.0.0.0', port=8000)
