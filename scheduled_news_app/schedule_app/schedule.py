@@ -1,6 +1,9 @@
 from flask import Flask, request
-import os
 import subprocess
+import os
+from datetime import datetime, time
+import threading
+import time
 app = Flask(__name__)
 
 # HTML templates as Python strings
@@ -344,19 +347,51 @@ def render_template(template, **context):
         result = result.replace(placeholder, str(value))
     return result
 
+def start_container():
+    """Execute the container start command"""
+    try:
+        result = subprocess.run(
+            ['/usr/bin/podman', '--url', 'unix:///run/podman/podman.sock', 'start', 'git_main_1'],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        with open('/tmp/container_launch.log', 'a') as f:
+            f.write(f"[{datetime.now()}] Container start attempted\n")
+            f.write(f"Output: {result.stdout}\n")
+            if result.stderr:
+                f.write(f"Errors: {result.stderr}\n")
+        
+        return True
+    except subprocess.CalledProcessError as e:
+        with open('/tmp/container_launch.log', 'a') as f:
+            f.write(f"[{datetime.now()}] ERROR: {e.stderr}\n")
+        return False
+
+def schedule_container_start(target_time):
+    """Background thread to start container at specified time"""
+    while True:
+        now = datetime.now().time()
+        if now.hour == target_time.hour and now.minute == target_time.minute:
+            if start_container():
+                with open('/tmp/container_launch.log', 'a') as f:
+                    f.write(f"[{datetime.now()}] Successfully started container\n")
+            break
+        time.sleep(30)
+
 @app.route('/')
 def index():
     return form_html
 
 @app.route('/schedule', methods=['POST'])
 def schedule():
-    """Handle form submission and schedule container start"""
     try:
-        time_str = request.form['time']  # Expected format: HH:MM
+        time_str = request.form['time']
         hour, minute = map(int, time_str.split(':'))
-        target_time = datetime.strptime(time_str, "%H:%M").time()
+        target_time = time(hour, minute)
         
-        # Start the scheduler in a background thread
         thread = threading.Thread(
             target=schedule_container_start,
             args=(target_time,),
@@ -364,20 +399,12 @@ def schedule():
         )
         thread.start()
         
-        # Log the scheduling
-        with open("/tmp/container_scheduler.log", "a") as log_file:
-            log_file.write(f"[{datetime.now()}] Scheduled container start for {time_str}\n")
-        
         return render_template(confirmation_html, time=time_str)
     
-    except ValueError as e:
+    except ValueError:
         return "Invalid time format. Please use HH:MM format.", 400
     except Exception as e:
         return f"An error occurred: {str(e)}", 500
 
 if __name__ == '__main__':
-    # Ensure log directory exists
-    os.makedirs("/tmp", exist_ok=True)
-    
-    # Start Flask app
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8000)
